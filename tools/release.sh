@@ -13,7 +13,7 @@
 set -euo pipefail
 
 NAME=dpsmeter
-CAPS=read,events,ui # README "For server owners"
+CAPS=read,commands,events,ui # README "For server owners"
 RELEASE_REPO=projecthailstone/hailstone-dpsmeter
 DESCRIPTION="A damage meter: your group's damage per second now, and every fight kept with its details."
 AUTHOR="Project Hailstone"

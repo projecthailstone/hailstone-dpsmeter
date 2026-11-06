@@ -95,8 +95,8 @@ Settings and the fights are kept per server and character in `scripts/config/dps
 ## For server owners
 
 DPS Meter is an ordinary player script, so your `hailstone.cfg` decides whether it runs at all
-(`[scripts] player = on` and the capabilities in `player_caps`). It needs `read`, `events` and `ui`. It only reads:
-it never targets, casts, moves or speaks.
+(`[scripts] player = on` and the capabilities in `player_caps`). It needs `read`, `commands` (for its `/dps`
+command), `events` and `ui`. It only reads: it never targets, casts, moves or speaks.
 
 ## Releasing
 
