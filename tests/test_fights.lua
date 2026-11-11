@@ -81,6 +81,61 @@ case("fights: a kill ends the fight sooner; pets kept apart when asked", functio
   check(fights.tick(F, 2600) ~= nil, "ended after the kill")
 end)
 
+case("fights: Triune pet proc and player spells count with their spell names", function()
+  -- Pet spawn data may not have arrived yet. The server's owner annotation still identifies our pet.
+  local triune = { me = "Tripet", wall = 1000, zone = "gukbottom",
+    classify = function(name)
+      if name == "Tripet" then return { side = "me", name = name } end
+      if name == "a wan ghoul knight" then return { side = "enemy", name = name } end
+      return { side = "other" }
+    end }
+  local proc = "Frost (Owner: Tripet) hit a wan ghoul knight for 108 points of non-melee damage. (Spirit of Inferno Strike)"
+  local bolt = "Tripet hit a wan ghoul knight for 59 points of non-melee damage. (Bolt of Flame)"
+  local F = fights.new()
+  eq(fights.event(F, parse.line(proc), 1000, triune), true)
+  eq(fights.event(F, parse.line(bolt), 2000, triune), true)
+  local f = F.current
+  check(f ~= nil)
+  eq(f.total, 167) eq(f.actors.Tripet.damage, 167) eq(f.actors.Tripet.pet, 108)
+  eq(f.actors.Tripet.hits, 2)
+  eq(f.actors.Tripet.abilities["Pet: Spirit of Inferno Strike"].damage, 108)
+  eq(f.actors.Tripet.abilities["Bolt of Flame"].damage, 59)
+  eq(fights.event(F, parse.line("Frost begins to cast a spell."), 2500, triune), false)
+  eq(f.total, 167, "cast starts do not add estimated damage")
+
+  local G = fights.new({ merge_pets = false })
+  eq(fights.event(G, parse.line(proc), 1000, triune), true)
+  eq(G.current.actors.Frost.damage, 108)
+  eq(G.current.actors.Tripet, nil)
+  eq(G.current.actors.Frost.abilities["Spirit of Inferno Strike"].damage, 108)
+end)
+
+case("fights: Triune ownership respects group scope", function()
+  local F = fights.new()
+  eq(feed(F, 0, "Unknown Pet (Owner: Soandso) hit a gnoll for 20 points of non-melee damage. (Test Proc)"), true)
+  eq(F.current.actors.Soandso.pet, 20)
+  eq(feed(F, 1, "Unknown Pet (Owner: Stranger) hit a gnoll for 99 points of non-melee damage. (Test Proc)"), false)
+  eq(F.current.total, 20, "strangers' pets are not part of the group")
+  eq(feed(F, 2, "Unknown Pet (Owner: You) hit a gnoll for 10 points of non-melee damage. (Test Proc)"), true)
+  eq(F.current.actors.Me.pet, 10)
+end)
+
+case("fights: Triune ownership follows everyone scope without changing spawn data", function()
+  local pet = { side = "enemy", name = "Unknown Pet" }
+  local everyone = { me = ctx.me, wall = ctx.wall, zone = ctx.zone,
+    classify = function(name)
+      if name == "Unknown Pet" then return pet end
+      if name == "Stranger" then return { side = "friend", name = "Stranger" } end
+      return ctx.classify(name)
+    end }
+  local F = fights.new()
+  local e = parse.line("Unknown Pet (Owner: Stranger) hit a gnoll for 99 points of non-melee damage. (Test Proc)")
+  eq(fights.event(F, e, 0, everyone), true)
+  eq(F.current.actors.Stranger.pet, 99)
+  eq(pet.side, "enemy", "classification data is not mutated")
+  eq(pet.owner, nil)
+end)
+
 case("fights: history is capped, sessions add up, restore renumbers", function()
   local F = fights.new({ max_history = 2 })
   for i = 1, 3 do
