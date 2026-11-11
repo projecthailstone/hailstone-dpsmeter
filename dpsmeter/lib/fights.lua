@@ -133,6 +133,13 @@ function fights.event(F, ev, now, ctx)
   end
 
   local si, di = ctx.classify(src), ctx.classify(dst)
+  if ev.owner then
+    -- Explicit server ownership also works before the pet's spawn is known. Classify the owner so
+    -- group/everyone scope still applies, without changing the classifier's shared spawn data.
+    local owner = name(ev.owner)
+    local oi = ctx.classify(owner)
+    si = { side = oi.side, name = src, owner = oi.name or owner }
+  end
   src, dst = si.name or src, di.name or dst
   local outgoing = ours(si) and enemy(di)
   local incoming = enemy(si) and ours(di)
