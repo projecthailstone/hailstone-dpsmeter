@@ -50,7 +50,10 @@ The damage is read from the combat lines in your chat, as most EverQuest parsers
 - What your chat filters hide is not counted. To count other players' hits, keep "others' hits" shown.
 - The hit display options must show full sentences, which is the default. The short and number-only modes leave out
   who hit.
-- A pet's spells do not show their damage in chat, so only a pet's melee counts.
+- Pet spells and procs count when the server sends their damage in chat. Triune's `(Owner: <name>)` and
+  trailing `(spell name)` are supported: pet damage is credited to its owner and the spell name is kept.
+  Keep pet spell damage shown in your chat filters. A cast-start message alone does not count as damage.
+  On Triune, Spellhold can also block pet procs; `#petcmd spellhold off all` allows them again.
 - The server sends damage over time and damage shield lines only to the caster. Another player's damage over time
   counts only when the server sends it to you as "has taken ... damage from <name> by <spell>".
 

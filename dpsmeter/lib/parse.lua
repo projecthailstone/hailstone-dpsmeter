@@ -61,6 +61,13 @@ end
 
 local function num(s) return tonumber((s:gsub(",", ""))) end
 
+-- Triune adds an owner to pet sources and a spell name after the stock damage sentence.
+local function spell(s, t, n, ability)
+  local pet, owner = s:match("^(.+) %(Owner: (.+)%)$")
+  return { kind = "spell", src = who(pet or s), owner = owner and who(owner), dst = who(t),
+    amount = num(n), ability = ability or "Spells" }
+end
+
 -- Each rule: a Lua pattern and what to make of its captures. Tried in order; the first match wins, so the specific
 -- shapes come before the melee one (434 also ends "for %2 points of damage.").
 local RULES = {
@@ -82,9 +89,8 @@ local RULES = {
   { "^(.+) was hit by non%-melee for ([%d,]+) points? of damage%.$", function(t, n)
     return { kind = "ds", src = parse.ME, dst = who(t), amount = num(n), ability = "Damage shield" }
   end },
-  { "^(.+) hit (.+) for ([%d,]+) points? of non%-melee damage%.$", function(s, t, n)
-    return { kind = "spell", src = who(s), dst = who(t), amount = num(n), ability = "Spells" }
-  end },
+  { "^(.+) hit (.+) for ([%d,]+) points? of non%-melee damage%. %((.+)%)$", spell },
+  { "^(.+) hit (.+) for ([%d,]+) points? of non%-melee damage%.$", spell },
   { "^You deliver a critical blast! %(([%d,]+)%)$", function(n)
     return { kind = "crit", src = parse.ME, amount = num(n), what = "blast" }
   end },
