@@ -35,6 +35,7 @@ local open = true
 local details_open = false
 local paths = nil         -- this character's settings and fights files
 local settings_dirty, history_dirty = nil, nil
+local save_warned = false -- said once that the fights file could not hold every fight (fights.save)
 local rev = 1             -- bumped when a setting changes (the window reads the settings again)
 
 local function say(text) hs.chat('[DPS Meter] ' .. text, 15) end
@@ -161,8 +162,13 @@ local function save_due(now)
     settings_dirty = nil
   end
   if history_dirty and now - history_dirty > 3000 then
-    mq.pickle(paths.fights, F.history)
+    local n, err = fights.save(F, function(list) mq.pickle(paths.fights, list) end)
     history_dirty = nil
+    if err and not save_warned then
+      save_warned = true
+      say(string.format("only the newest %d of %d fights fit in the saved file; the others go when the script stops (%s)",
+        n, #F.history, tostring(err)))
+    end
   end
 end
 

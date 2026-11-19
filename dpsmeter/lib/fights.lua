@@ -366,4 +366,19 @@ function fights.restore(F, saved)
   F.rev = F.rev + 1
 end
 
+-- Writes the kept fights, newest first, with write(list) (mq.pickle). Clients from 0.7.1 refuse with an error a file
+-- over 8 MiB, or one that would take the script's config folder past its limits (long fights with many players and
+-- a long history get there); then the newest half is written, and so on until a write succeeds. The fights in memory
+-- stay as they are. Returns how many were written (0: none could be) and, if any write was refused, its error.
+function fights.save(F, write)
+  local n = #F.history
+  local ok, err = pcall(write, F.history)
+  if ok then return n end
+  while n > 1 do
+    n = n // 2
+    if pcall(write, table.move(F.history, 1, n, 1, {})) then return n, err end
+  end
+  return 0, err
+end
+
 return fights

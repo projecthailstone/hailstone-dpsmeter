@@ -166,3 +166,28 @@ case("fights: a fight with only damage taken is dropped", function()
   eq(fights.finish(F), nil)
   eq(#F.history, 0)
 end)
+
+case("fights: save writes fewer fights, newest first, when the client refuses the file", function()
+  local F = fights.new({ max_history = 10 })
+  for i = 1, 10 do
+    feed(F, i * 100000, "You slash a gnoll for " .. i .. " points of damage.")
+    fights.finish(F)
+  end
+  local wrote
+  local function fits(max) -- as mq.pickle on a client from 0.7.1: an error past its limits
+    return function(list)
+      if #list > max then error("mq.pickle: 'dpsmeter/x_fights.lua' would be over 8 MiB") end
+      wrote = list
+    end
+  end
+  local n, err = fights.save(F, fits(10))
+  eq(n, 10) eq(err, nil) eq(#wrote, 10)
+  n, err = fights.save(F, fits(3))
+  eq(n, 2, "halved until it fits") check(err and err:find("8 MiB"), "the refusal is passed on")
+  eq(#wrote, 2) eq(wrote[1].total, 10, "the newest") eq(wrote[2].total, 9)
+  eq(#F.history, 10, "memory keeps every fight")
+  wrote = nil
+  n, err = fights.save(F, fits(0))
+  eq(n, 0) check(err ~= nil, "an error") eq(wrote, nil)
+  eq(fights.save(fights.new(), fits(0)), 0, "nothing to write")
+end)
