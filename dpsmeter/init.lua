@@ -24,6 +24,7 @@ local TICK_MS = 50
 local SPAWNS_MS = 1000
 
 local DEFAULTS = { idle = 6, who = "group", merge_pets = true, history = 40, rows = 6, view = "fight", show_rates = true }
+local LIMITS = { idle = { 2, 60 }, history = { 5, 60 }, rows = { 3, 12 } }
 local S = {}
 for k, v in pairs(DEFAULTS) do S[k] = v end
 
@@ -145,6 +146,8 @@ local function load_all()
   if ok and type(t) == "table" then
     for k, v in pairs(DEFAULTS) do
       if type(t[k]) == type(v) then S[k] = t[k] end
+      -- a value saved before a limit came down (History went from 200 to 60) is brought into range
+      if LIMITS[k] and type(S[k]) == "number" then S[k] = math.max(LIMITS[k][1], math.min(LIMITS[k][2], math.floor(S[k]))) end
     end
   end
   apply()
@@ -172,7 +175,6 @@ local function save_due(now)
   end
 end
 
-local LIMITS = { idle = { 2, 60 }, history = { 5, 200 }, rows = { 3, 12 } }
 
 local function set(key, value)
   local d = DEFAULTS[key]

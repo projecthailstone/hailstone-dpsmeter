@@ -803,7 +803,7 @@ local function optionsPage(x, y, w, h, s)
   yy = yy + 46 * s
   row("Fights kept", "The oldest go first; they are kept between logins")
   ui.SetNextItemWidth(220 * s)
-  n, changed = ui.SliderInt("##dpshist", S.history or 40, 5, 200, (S.history or 40) .. " fights")
+  n, changed = ui.SliderInt("##dpshist", S.history or 40, 5, 60, (S.history or 40) .. " fights")
   if changed then P.set("history", n) end
   yy = yy + 56 * s
   ui.DrawLine(x, yy, x + w, yy, C.ink[1], C.ink[2], C.ink[3], 0.08, 1)
