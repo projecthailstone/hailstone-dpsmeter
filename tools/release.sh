@@ -9,7 +9,7 @@
 # Needs a hailstone-client checkout ($HAILSTONE_CLIENT, default ../hailstone-client) for tools/make_addon.py and a
 # built hailstone_sign ($HAILSTONE_SIGN, default $HAILSTONE_CLIENT/build/hailstone_sign), the add-on key's secret
 # half ($ADDON_KEY, default ~/.config/hailstone-release/addon-key.secret: keep it off GitHub, and keep using the same
-# one, since a player's client refuses an update signed with another), and lua5.4 for the tests.
+# one, since a player's client refuses an update signed with another), and lua5.5 for the tests.
 set -euo pipefail
 
 NAME=dpsmeter
@@ -37,7 +37,7 @@ if [ -n "$(git -C "$here" status --porcelain)" ]; then
   exit 1
 fi
 
-(cd "$here" && lua5.4 tests/run.lua)
+(cd "$here" && lua5.5 tests/run.lua)
 rm -rf "$out"
 python3 "$client/tools/make_addon.py" --name "$NAME" --kind script --version "$version" --caps "$CAPS" \
     --dir "$here/dpsmeter" --author "$AUTHOR" --description "$DESCRIPTION" --min-client "$MIN_CLIENT" \

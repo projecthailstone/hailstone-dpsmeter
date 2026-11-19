@@ -117,10 +117,10 @@ MIT (see `LICENSE`).
 
 ## Development
 
-The line parser and the fight bookkeeping are tested with plain Lua 5.4:
+The line parser and the fight bookkeeping are tested with plain Lua 5.5 (5.4 works too):
 
 ```sh
-lua5.4 tests/run.lua
+lua5.5 tests/run.lua
 ```
 
 `dpsmeter/init.lua`, which reads the game, and the window are not covered by these tests. Try them in the client.

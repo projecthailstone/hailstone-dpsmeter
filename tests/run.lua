@@ -1,4 +1,4 @@
--- The pure parts of DPS Meter, tested with plain Lua 5.4 (no client): lua5.4 tests/run.lua
+-- The pure parts of DPS Meter, tested with plain Lua 5.5 or 5.4 (no client): lua5.5 tests/run.lua
 -- init.lua and the window read the game and are not covered here.
 local root = arg[0]:match("^(.*)/tests/run%.lua$") or "."
 package.path = root .. "/dpsmeter/?.lua;" .. root .. "/tests/?.lua;" .. package.path
