@@ -47,6 +47,7 @@ local me = ""
 local zone = 0
 local by_name = {}   -- lower-case shown name -> { name, npc, owner (id), class, id }
 local by_id = {}     -- spawn id -> the same
+local by_squash = {} -- parse.squash(shown name) -> the same, for lines whose names lost their spaces
 local group = {}     -- lower-case name -> true
 local spawns_at = -1e9
 
@@ -68,6 +69,12 @@ local function read_spawns(now)
   -- names that went (a mob killed and rotted, a pet dismissed) are remembered for the zone: their lines still come
   for k, e in pairs(by_name) do if not names[k] then names[k] = e end end
   by_name, by_id = names, ids
+  by_squash = {}
+  for _, e in pairs(names) do
+    local k = parse.squash(e.name)
+    -- a name two spawns squash to is ambiguous: the live one wins, as in by_name
+    if not by_squash[k] or ids[e.id] == e then by_squash[k] = e end
+  end
   group = {}
   local n = tonumber(mq.TLO.Group.Members()) or 0
   for i = 1, n do
@@ -93,6 +100,7 @@ classify = function(name, depth)
     read_spawns(mq.gettime()) -- a spawn that came since the last read
     e = by_name[name:lower()]
   end
+  e = e or by_squash[parse.squash(name)]
   if e then
     if not e.npc and not e.merc then
       return { side = player_side(e.name), name = e.name, class = e.class }
@@ -376,7 +384,7 @@ while true do
     -- a new zone: the fight there is over, and its names mean nothing here
     if fights.finish(F) then history_dirty = now end
     zone = z
-    by_name, by_id = {}, {}
+    by_name, by_id, by_squash = {}, {}, {}
     spawns_at = -1e9
   end
   if now - spawns_at > SPAWNS_MS then read_spawns(now) end

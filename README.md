@@ -54,6 +54,8 @@ The damage is read from the combat lines in your chat, as most EverQuest parsers
   trailing `(spell name)` are supported: pet damage is credited to its owner and the spell name is kept.
   Keep pet spell damage shown in your chat filters. A cast-start message alone does not count as damage.
   On Triune, Spellhold can also block pet procs; `#petcmd spellhold off all` allows them again.
+- Some servers name an NPC stored with spaces without them in spell damage lines ("Soandso hit awitheredcaretaker
+  for ..."). Such a name is matched to the spawn by its letters, so those hits count for the same mob.
 - The server sends damage over time and damage shield lines only to the caster. Another player's damage over time
   counts only when the server sends it to you as "has taken ... damage from <name> by <spell>".
 
