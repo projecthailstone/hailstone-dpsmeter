@@ -141,4 +141,11 @@ function parse.display_name(name)
   return ((tostring(name or ""):gsub("%d+$", "")):gsub("_", " "))
 end
 
+-- A name as the server's legacy CleanMobName leaves it in some lines (the spell damage sentence, eqstr 9073, takes
+-- both names from GetCleanName): only letters and backticks are kept, so a name stored with spaces instead of
+-- underscores loses them ("a withered caretaker" -> "awitheredcaretaker"). The key both forms meet at, lower case.
+function parse.squash(name)
+  return (tostring(name or ""):lower():gsub("[^%a`]", ""))
+end
+
 return parse

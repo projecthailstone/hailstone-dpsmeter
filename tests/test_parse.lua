@@ -82,3 +82,12 @@ case("parse: other lines are not events", function()
   eq(parse.line(nil), nil)
   eq(parse.display_name("a_gnoll_pup01"), "a gnoll pup")
 end)
+
+case("parse: squash meets the server's CleanMobName", function()
+  -- a spell line names a mob stored with spaces as "awitheredcaretaker"; the spawn shows "a withered caretaker"
+  local e = ev("Havre hit awitheredcaretaker for 1488 points of non-melee damage.")
+  eq(e.kind, "spell") eq(e.dst, "awitheredcaretaker")
+  eq(parse.squash(e.dst), parse.squash("a withered caretaker"))
+  eq(parse.squash("a withered caretaker"), parse.squash(parse.display_name("a_withered_caretaker01")))
+  eq(parse.squash("Soandso`s warder"), "soandso`swarder")
+end)
